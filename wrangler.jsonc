@@ -1,0 +1,42 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "reputo",
+  "compatibility_date": "2025-03-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "compatibility_flags": [
+    "nodejs_compat",
+    "global_fetch_strictly_public"
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "reputo"
+    }
+  ],
+  "vars": {
+    "NEXT_PUBLIC_APP_URL": "https://reputo.co",
+    "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_live_51T5ybJGbH9JTqpnwoLu0852gVdHw5v4Vn3PjqiZhPSkQ5sBLrwwiVMEMRBIQPQwh4PmwF4mEB1f7m1ofMrzUn7Qq00w20BGiee"
+  },
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true
+    }
+  },
+  "routes": [
+    {
+      "pattern": "reputo.co/*",
+      "zone_name": "reputo.co"
+    },
+    {
+      "pattern": "www.reputo.co/*",
+      "zone_name": "reputo.co"
+    }
+  ]
+}
