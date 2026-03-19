@@ -6,9 +6,9 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/dashboard", "/inbox", "/agent", "/settings", "/onboarding"],
+        disallow: ["/api/", "/account"],
       },
     ],
-    sitemap: "https://reputo.co/sitemap.xml",
+    sitemap: "https://remotegig.pro/sitemap.xml",
   };
 }
