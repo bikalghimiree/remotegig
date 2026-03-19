@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { getServerAuth } from "@/lib/server-auth";
-const PRICE_ID = "price_1TCkBTGbH9JTqpnwjx1jOdcv";
 
 export async function POST() {
   try {
     const { user, stripeCustomerId } = await getServerAuth();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const priceId = process.env.NEXT_PUBLIC_STRIPE_PRO_MONTHLY!;
 
     // Create or reuse Stripe customer
     let customerId = stripeCustomerId;
@@ -22,10 +23,10 @@ export async function POST() {
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       mode: "subscription",
-      line_items: [{ price: PRICE_ID, quantity: 1 }],
+      line_items: [{ price: priceId, quantity: 1 }],
       allow_promotion_codes: true,
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://reputo.co"}/dashboard?upgraded=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://reputo.co"}/onboarding`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://remotegig.pro"}/?upgraded=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://remotegig.pro"}/`,
       metadata: { userId: user.id },
     });
 

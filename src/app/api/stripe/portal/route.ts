@@ -31,7 +31,7 @@ export async function POST() {
 
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://reputo.co"}/settings`,
+      return_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://remotegig.pro"}/account`,
     });
 
     return NextResponse.json({ url: session.url });

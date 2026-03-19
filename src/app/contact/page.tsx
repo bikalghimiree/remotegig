@@ -1,16 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { SunIcon, MoonIcon } from "lucide-react";
-import { useTheme } from "@/hooks/use-theme";
-import Footer from "@/components/Footer";
+import { useOpenPanel } from "@openpanel/nextjs";
 
 export default function ContactPage() {
-  const { dark, toggle } = useTheme();
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const op = useOpenPanel();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -19,96 +17,80 @@ export default function ContactPage() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ name, email, message }),
       });
       if (!res.ok) throw new Error();
       setStatus("sent");
-      setForm({ name: "", email: "", message: "" });
+      op.track("contact_form_submitted", { email });
+      setName("");
+      setEmail("");
+      setMessage("");
     } catch {
       setStatus("error");
+      op.track("contact_form_error", { email });
     }
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <header className="bg-background">
-        <div className="mx-auto max-w-[1350px] px-4 sm:px-6 h-[56px] flex items-center">
-          <Link href="/" className="shrink-0 no-underline flex items-center gap-2">
-            <Image src="/logo.svg" alt="Reputo" width={24} height={24} className="size-6" />
-            <span className="text-[18px] font-semibold tracking-tight text-foreground">REPUTO</span>
-          </Link>
-          <div className="flex-1" />
-          <button
-            onClick={toggle}
-            className="size-8 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-foreground/[0.06] transition-colors cursor-pointer bg-transparent border-0"
-            aria-label="Toggle theme"
-          >
-            {dark ? <SunIcon size={16} /> : <MoonIcon size={16} />}
-          </button>
-        </div>
-      </header>
-
-      <main className="w-full flex-1 mx-auto max-w-[600px] px-4 sm:px-6 pt-12 sm:pt-20 pb-20">
-        <h1 className="text-[24px] sm:text-[28px] font-normal tracking-[-0.02em] text-foreground mb-2">
-          Contact
-        </h1>
-        <p className="text-[16px] text-foreground mb-8">
-          Have a question or need help? Send us a message or email{" "}
-          <a href="mailto:contact@reputo.co" className="underline">contact@reputo.co</a>.
-        </p>
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="mx-auto max-w-[500px] px-4 sm:px-6 py-12 sm:py-16">
+        <h1 className="text-[28px] sm:text-[36px] font-semibold tracking-tight mb-2">Contact Us</h1>
+        <p className="text-[15px] text-muted-foreground mb-8">Have a question, feedback, or issue? We will get back to you within 24 hours.</p>
 
         {status === "sent" ? (
-          <div className="border border-border rounded-xl bg-card p-4">
-            <p className="text-[15px] font-medium text-foreground">Message sent</p>
-            <p className="text-[14px] text-foreground mt-0.5">We will get back to you soon.</p>
+          <div className="rounded-xl border border-border bg-card p-6 text-center">
+            <p className="text-[16px] font-medium text-foreground mb-1">Message sent!</p>
+            <p className="text-[14px] text-muted-foreground">We will get back to you soon.</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-[14px] text-foreground mb-1.5">Name</label>
+              <label className="text-[14px] font-medium text-foreground block mb-1.5">Name</label>
               <input
                 type="text"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
-                className="w-full h-11 px-4 rounded-lg border border-border bg-card text-[15px] text-foreground outline-none focus:border-foreground/30 transition-colors"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full h-11 px-4 rounded-lg border border-border bg-card text-[15px] text-foreground placeholder:text-muted-foreground"
+                placeholder="Your name"
               />
             </div>
             <div>
-              <label className="block text-[14px] text-foreground mb-1.5">Email</label>
+              <label className="text-[14px] font-medium text-foreground block mb-1.5">Email</label>
               <input
                 type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
                 required
-                className="w-full h-11 px-4 rounded-lg border border-border bg-card text-[15px] text-foreground outline-none focus:border-foreground/30 transition-colors"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full h-11 px-4 rounded-lg border border-border bg-card text-[15px] text-foreground placeholder:text-muted-foreground"
+                placeholder="you@email.com"
               />
             </div>
             <div>
-              <label className="block text-[14px] text-foreground mb-1.5">Message</label>
+              <label className="text-[14px] font-medium text-foreground block mb-1.5">Message</label>
               <textarea
-                value={form.message}
-                onChange={(e) => setForm({ ...form, message: e.target.value })}
                 required
-                rows={5}
-                className="w-full px-4 py-3 rounded-lg border border-border bg-card text-[15px] text-foreground outline-none focus:border-foreground/30 transition-colors resize-none placeholder:text-foreground"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={4}
+                className="w-full px-4 py-3 rounded-lg border border-border bg-card text-[15px] text-foreground placeholder:text-muted-foreground resize-none"
+                placeholder="How can we help?"
               />
             </div>
             <button
               type="submit"
               disabled={status === "sending"}
-              className="h-8 px-3 rounded-full bg-foreground text-background text-[14px] font-medium hover:opacity-90 transition-opacity cursor-pointer border-0 disabled:opacity-50"
+              className="w-full h-11 rounded-lg text-[14px] font-semibold cursor-pointer border-0 hover:opacity-90 transition-opacity disabled:opacity-50"
+              style={{ background: '#006145', color: '#fff' }}
             >
               {status === "sending" ? "Sending..." : "Send Message"}
             </button>
             {status === "error" && (
-              <p className="text-[14px] text-foreground">Something went wrong. Please try again.</p>
+              <p className="text-[13px] text-destructive text-center">Something went wrong. Please try again.</p>
             )}
           </form>
         )}
-      </main>
-
-      <Footer />
+      </div>
     </div>
   );
 }

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Have a question or want to list a brand deal? Get in touch with the Reputo team.",
-  alternates: { canonical: "https://reputo.co/contact" },
+  description: "Get in touch with the RemoteGig team.",
+  alternates: { canonical: "https://remotegig.pro/contact" },
 };
 
 export default function ContactLayout({ children }: { children: React.ReactNode }) {

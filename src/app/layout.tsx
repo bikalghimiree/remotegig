@@ -1,5 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
+import { OpenPanelComponent, IdentifyComponent } from "@openpanel/nextjs";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { getServerAuth } from "@/lib/server-auth";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -14,13 +18,13 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://remojob.site"),
+  metadataBase: new URL("https://remotegig.pro"),
   title: {
-    default: "RemoJob | Remote Jobs Updated Daily",
-    template: "%s | RemoJob",
+    default: "RemoteGig | Every Remote Job. One Place.",
+    template: "%s | RemoteGig",
   },
   description:
-    "Browse thousands of remote jobs from real companies. Apply instantly to remote developer, marketing, design, and more positions.",
+    "We pull remote jobs from across the internet so you don't have to. Only real, verified positions, updated hourly.",
   keywords: [
     "remote jobs",
     "work from home",
@@ -35,22 +39,22 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     type: "website",
-    siteName: "RemoJob",
-    title: "RemoJob | Remote Jobs Updated Daily",
+    siteName: "RemoteGig",
+    title: "RemoteGig | Every Remote Job. One Place.",
     description:
-      "Browse thousands of remote jobs from real companies. Apply instantly.",
-    url: "https://remojob.site",
+      "We pull remote jobs from across the internet so you don't have to. Only real, verified positions, updated hourly.",
+    url: "https://remotegig.pro",
   },
   twitter: {
     card: "summary_large_image",
-    title: "RemoJob | Remote Jobs Updated Daily",
+    title: "RemoteGig | Every Remote Job. One Place.",
     description:
-      "Browse thousands of remote jobs from real companies. Apply instantly.",
-    creator: "@remojob_",
-    site: "@remojob_",
+      "We pull remote jobs from across the internet so you don't have to. Only real, verified positions, updated hourly.",
+    creator: "@remotegig_",
+    site: "@remotegig_",
   },
   alternates: {
-    canonical: "https://remojob.site",
+    canonical: "https://remotegig.pro",
   },
   icons: {
     icon: "/favicon.svg",
@@ -58,11 +62,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { user } = await getServerAuth();
+
   return (
     <html lang="en" className={geistSans.variable} suppressHydrationWarning>
       <head>
@@ -72,8 +78,27 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="bg-background text-foreground font-sans antialiased">
-        {children}
+      <body className="bg-background text-foreground font-sans antialiased min-h-screen flex flex-col">
+        <OpenPanelComponent
+          clientId={process.env.NEXT_PUBLIC_OPENPANEL_CLIENT_ID!}
+          apiUrl="/api/op"
+          scriptUrl="/api/op/op1.js"
+          trackScreenViews={true}
+          trackOutgoingLinks={true}
+          trackAttributes={true}
+        />
+        {user && (
+          <IdentifyComponent
+            profileId={user.id}
+            firstName={user.displayName.split(" ")[0]}
+            lastName={user.displayName.split(" ").slice(1).join(" ") || ""}
+            email={user.email}
+            avatar={user.avatarUrl || undefined}
+          />
+        )}
+        <Header user={user} />
+        <div className="flex-1">{children}</div>
+        <Footer />
       </body>
     </html>
   );

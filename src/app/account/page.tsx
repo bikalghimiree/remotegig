@@ -4,7 +4,7 @@ import AccountContent from "./AccountContent";
 
 export const metadata = {
   title: "Account",
-  description: "Manage your Reputo account, subscription, and settings.",
+  description: "Manage your RemoteGig account and subscription.",
 };
 
 export default async function AccountPage() {

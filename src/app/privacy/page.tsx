@@ -1,94 +1,66 @@
-"use client";
+import type { Metadata } from "next";
 
-import Image from "next/image";
-import Link from "next/link";
-import { SunIcon, MoonIcon } from "lucide-react";
-import { useTheme } from "@/hooks/use-theme";
-import Footer from "@/components/Footer";
+export const metadata: Metadata = { title: "Privacy Policy" };
 
 export default function PrivacyPage() {
-  const { dark, toggle } = useTheme();
-
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <header className="bg-background">
-        <div className="mx-auto max-w-[1350px] px-4 sm:px-6 h-[56px] flex items-center">
-          <Link href="/" className="shrink-0 no-underline flex items-center gap-2">
-            <Image src="/logo.svg" alt="Reputo" width={24} height={24} className="size-6" />
-            <span className="text-[18px] font-semibold tracking-tight text-foreground">REPUTO</span>
-          </Link>
-          <div className="flex-1" />
-          <button
-            onClick={toggle}
-            className="size-8 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-foreground/[0.06] transition-colors cursor-pointer bg-transparent border-0"
-            aria-label="Toggle theme"
-          >
-            {dark ? <SunIcon size={16} /> : <MoonIcon size={16} />}
-          </button>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="mx-auto max-w-[700px] px-4 sm:px-6 py-12 sm:py-16">
+        <h1 className="text-[28px] sm:text-[36px] font-semibold tracking-tight mb-8">Privacy Policy</h1>
+        <p className="text-[14px] text-muted-foreground mb-8">Last updated: March 19, 2026</p>
 
-      <main className="w-full flex-1 mx-auto max-w-[640px] px-4 sm:px-6 pt-12 sm:pt-20 pb-20">
-        <h1 className="text-[24px] sm:text-[28px] font-normal tracking-[-0.02em] text-foreground mb-2">
-          Privacy Policy
-        </h1>
-        <p className="text-[16px] text-foreground mb-10">Last updated: March 19, 2026</p>
-
-        <div className="space-y-8">
+        <div className="space-y-8 text-[15px] leading-relaxed text-foreground">
           <section>
-            <h2 className="text-[16px] font-medium text-foreground mb-2">Information We Collect</h2>
-            <p className="text-[16px] text-foreground leading-relaxed">
-              When you sign in with Google, we collect your name, email address, and profile picture. We also store your job applications and saved preferences within the platform.
-            </p>
+            <h2 className="text-[18px] font-medium mb-3">1. Information We Collect</h2>
+            <p>When you use RemoteGig, we collect the following information:</p>
+            <ul className="list-disc pl-6 mt-2 space-y-1 text-foreground">
+              <li>Account information (name, email) when you sign in with Google</li>
+              <li>Usage data (pages viewed, jobs clicked) via OpenPanel analytics</li>
+              <li>Payment information processed securely through Stripe</li>
+              <li>Contact form submissions (name, email, message)</li>
+            </ul>
           </section>
 
           <section>
-            <h2 className="text-[16px] font-medium text-foreground mb-2">How We Use Your Information</h2>
-            <p className="text-[16px] text-foreground leading-relaxed">
-              Your information is used to authenticate your account, display relevant brand deal opportunities, and process your applications. We may send account-related notifications to your email.
-            </p>
+            <h2 className="text-[18px] font-medium mb-3">2. How We Use Your Information</h2>
+            <ul className="list-disc pl-6 space-y-1 text-foreground">
+              <li>To provide and improve the RemoteGig service</li>
+              <li>To process payments and manage subscriptions</li>
+              <li>To send job alerts and notifications (with your consent)</li>
+              <li>To respond to your support requests</li>
+              <li>To analyze usage patterns and improve user experience</li>
+            </ul>
           </section>
 
           <section>
-            <h2 className="text-[16px] font-medium text-foreground mb-2">Data Storage</h2>
-            <p className="text-[16px] text-foreground leading-relaxed">
-              Your data is stored securely on Neon (PostgreSQL) databases hosted in the United States. We use industry-standard encryption and security practices to protect your information.
-            </p>
+            <h2 className="text-[18px] font-medium mb-3">3. Third-Party Services</h2>
+            <p>We use the following third-party services:</p>
+            <ul className="list-disc pl-6 mt-2 space-y-1 text-foreground">
+              <li><strong>Neon</strong> (database hosting and authentication)</li>
+              <li><strong>Stripe</strong> (payment processing)</li>
+              <li><strong>Google OAuth</strong> (sign-in authentication)</li>
+              <li><strong>OpenPanel</strong> (self-hosted analytics)</li>
+              <li><strong>Cloudflare</strong> (hosting and CDN)</li>
+              <li><strong>ZeptoMail</strong> (transactional emails)</li>
+            </ul>
           </section>
 
           <section>
-            <h2 className="text-[16px] font-medium text-foreground mb-2">Third-Party Services</h2>
-            <p className="text-[16px] text-foreground leading-relaxed">
-              We use Google OAuth for authentication, Neon for database hosting, and Stripe for payment processing. These services have their own privacy policies.
-            </p>
+            <h2 className="text-[18px] font-medium mb-3">4. Data Security</h2>
+            <p>We implement appropriate security measures to protect your personal information. Payment data is handled entirely by Stripe and never stored on our servers.</p>
           </section>
 
           <section>
-            <h2 className="text-[16px] font-medium text-foreground mb-2">Cookies</h2>
-            <p className="text-[16px] text-foreground leading-relaxed">
-              We use essential cookies to maintain your session and preferences. We do not use third-party tracking or advertising cookies.
-            </p>
+            <h2 className="text-[18px] font-medium mb-3">5. Your Rights</h2>
+            <p>You can request to access, update, or delete your personal data at any time by contacting us. You can also cancel your subscription directly from your account page.</p>
           </section>
 
           <section>
-            <h2 className="text-[16px] font-medium text-foreground mb-2">Your Rights</h2>
-            <p className="text-[16px] text-foreground leading-relaxed">
-              You can request deletion of your account and all associated data at any time by contacting us at{" "}
-              <a href="mailto:contact@reputo.co" className="text-foreground underline">contact@reputo.co</a>.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-[16px] font-medium text-foreground mb-2">Contact</h2>
-            <p className="text-[16px] text-foreground leading-relaxed">
-              For privacy-related questions, email us at{" "}
-              <a href="mailto:contact@reputo.co" className="text-foreground underline">contact@reputo.co</a>.
-            </p>
+            <h2 className="text-[18px] font-medium mb-3">6. Contact</h2>
+            <p>For any privacy-related questions, reach out at <a href="/contact" className="text-primary hover:underline">remotegig.pro/contact</a>.</p>
           </section>
         </div>
-      </main>
-
-      <Footer />
+      </div>
     </div>
   );
 }

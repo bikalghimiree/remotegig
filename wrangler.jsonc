@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
-  "name": "reputo",
+  "name": "remotegig",
   "compatibility_date": "2025-03-01",
   "workers_dev": false,
   "preview_urls": false,
@@ -16,12 +16,14 @@
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "reputo"
+      "service": "remotegig"
     }
   ],
   "vars": {
-    "NEXT_PUBLIC_APP_URL": "https://reputo.co",
-    "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_live_51T5ybJGbH9JTqpnwoLu0852gVdHw5v4Vn3PjqiZhPSkQ5sBLrwwiVMEMRBIQPQwh4PmwF4mEB1f7m1ofMrzUn7Qq00w20BGiee"
+    "NEXT_PUBLIC_APP_URL": "https://remotegig.pro",
+    "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_live_51TCofDGkS6AWGclYkny1DpSl5NeAULu8lQHSvb7SuPxj8ru4SIqx4L5bEE5ZZDyEzeUUz1kpTt57MRCFrz86tn0b00ZJT76Tgs",
+    "NEXT_PUBLIC_OPENPANEL_CLIENT_ID": "e1d7373c-20cc-413c-8172-fbd8871e1a2b",
+    "NEXT_PUBLIC_STRIPE_PRO_MONTHLY": "price_1TCp5DGkS6AWGclYSsGLl6sJ"
   },
   "observability": {
     "logs": {
@@ -31,12 +33,12 @@
   },
   "routes": [
     {
-      "pattern": "reputo.co/*",
-      "zone_name": "reputo.co"
+      "pattern": "remotegig.pro/*",
+      "zone_name": "remotegig.pro"
     },
     {
-      "pattern": "www.reputo.co/*",
-      "zone_name": "reputo.co"
+      "pattern": "www.remotegig.pro/*",
+      "zone_name": "remotegig.pro"
     }
   ]
 }

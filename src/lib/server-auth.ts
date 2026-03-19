@@ -13,7 +13,6 @@ export interface ServerAuth {
   user: ServerUser | null;
   plan: "pro" | "free";
   stripeCustomerId: string | null;
-  appliedCount: number;
 }
 
 export async function getServerAuth(): Promise<ServerAuth> {
@@ -21,7 +20,7 @@ export async function getServerAuth(): Promise<ServerAuth> {
     const { data: session } = await auth.getSession();
 
     if (!session?.user) {
-      return { user: null, plan: "free", stripeCustomerId: null, appliedCount: 0 };
+      return { user: null, plan: "free", stripeCustomerId: null };
     }
 
     const user = session.user;
@@ -48,6 +47,7 @@ export async function getServerAuth(): Promise<ServerAuth> {
       ON CONFLICT (user_id) DO NOTHING
     `;
 
+    // Analytics: identify user + track login
     op.identify({ profileId: user.id, email: user.email || "", name: user.name || "" });
     op.track("user_login", { profileId: user.id, email: user.email || "" });
 
@@ -64,12 +64,6 @@ export async function getServerAuth(): Promise<ServerAuth> {
     const plan = (rows[0]?.plan as "pro" | "free") || "free";
     const stripeCustomerId = (rows[0]?.stripe_customer_id as string) || null;
 
-    // Fetch applied count
-    const countRows = await sql`
-      SELECT COUNT(*)::int as count FROM job_applications WHERE user_id = ${user.id}
-    `;
-    const appliedCount = countRows[0]?.count || 0;
-
     return {
       user: {
         id: user.id,
@@ -79,10 +73,9 @@ export async function getServerAuth(): Promise<ServerAuth> {
       },
       plan,
       stripeCustomerId,
-      appliedCount,
     };
   } catch (err) {
     console.error("[auth] ERROR in getServerAuth:", err);
-    return { user: null, plan: "free", stripeCustomerId: null, appliedCount: 0 };
+    return { user: null, plan: "free", stripeCustomerId: null };
   }
 }
