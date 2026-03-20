@@ -26,7 +26,6 @@ Location: 🌎 Remote
 • SAP, Oracle, Informatica expertise required
 
 Comment "APPLY" and we'll send you the direct link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #dataanalyst #hiring #remotework`,
 
@@ -41,7 +40,6 @@ Location: 🌎 Remote
 • SQL, data visualization, 1-3 yrs experience
 
 Comment "APPLY" for the direct link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #dataanalyst #hiring #remotework`,
 
@@ -56,7 +54,6 @@ Location: 🌎 Remote
 • Excel, R, Python, SQL, Tableau
 
 Comment "APPLY" and we'll send the link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #datajobs #juniorjobs #hiring`,
 
@@ -71,7 +68,6 @@ Location: 🌎 Remote
 • Machine learning + cloud platforms + BI tools
 
 Comment "APPLY" for the direct link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #dataanalyst #AI #hiring`,
 
@@ -86,7 +82,6 @@ Location: 🌎 Remote
 • SQL, Python, Tableau required
 
 Comment "APPLY" and we'll send you the link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #dataanalyst #hiring #remotework`,
 
@@ -101,7 +96,6 @@ Location: 🌎 Remote
 • SQL, data visualization, data warehouse design
 
 Comment "APPLY" for the direct link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #datajobs #BI #hiring`,
 
@@ -116,7 +110,6 @@ Location: 🌎 Remote
 • Excel modeling, SQL, cross-functional collaboration
 
 Comment "APPLY" and we'll send the link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #dataanalyst #hiring #remotework`,
 
@@ -131,7 +124,6 @@ Location: 🌎 Remote
 • Microsoft analytics tools, supplier management
 
 Comment "APPLY" for the direct link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #dataanalyst #contract #hiring`,
 
@@ -146,7 +138,6 @@ Location: 🌎 Remote
 • Prepare new business issues & consolidate quotes
 
 Comment "APPLY" and we'll send you the link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #dataentry #hiring #remotework`,
 
@@ -161,7 +152,6 @@ Location: 🌎 Remote
 • Google Sheets, Excel, US time zones
 
 Comment "APPLY" for the direct link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #dataentry #hiring #workfromhome`,
 
@@ -176,7 +166,6 @@ Location: 🌎 Remote
 • Document transactions & resolve discrepancies
 
 Comment "APPLY" and we'll send the link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #dataentry #hiring #remotework`,
 
@@ -191,7 +180,6 @@ Location: 🌎 Remote
 • 1yr data entry experience, strong typing speed
 
 Comment "APPLY" for the direct link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #dataentry #hiring #workfromhome`,
 
@@ -206,7 +194,6 @@ Location: 🌎 Remote
 • Excel, Visual Basic, Smartsheet
 
 Comment "APPLY" and we'll send the link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #dataanalyst #energy #hiring`,
 
@@ -221,7 +208,6 @@ Location: 🌎 Remote
 • AWS, PySpark, SQL
 
 Comment "APPLY" for the direct link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #datajobs #internship #hiring`,
 
@@ -236,7 +222,6 @@ Location: 🌎 Remote
 • Build dashboards & automate reporting
 
 Comment "APPLY" and we'll send the link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #dataanalyst #internship #hiring`,
 
@@ -253,7 +238,6 @@ Location: 🌎 Remote
 • Full dev lifecycle, TDD/BDD, code reviews
 
 Comment "APPLY" for the direct link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #softwareengineer #react #hiring`,
 
@@ -268,7 +252,6 @@ Location: 🌎 Remote
 • JavaScript, web development, user-centered design
 
 Comment "APPLY" and we'll send the link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #frontend #hiring #remotework`,
 
@@ -283,7 +266,6 @@ Location: 🌎 Remote
 • SQL, Python, product analytics
 
 Comment "APPLY" for the direct link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #productanalyst #hiring #remotework`,
 
@@ -298,7 +280,6 @@ Location: 🌎 Remote
 • Cypress, WebDriverIO, JavaScript/TypeScript
 
 Comment "APPLY" and we'll send the link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #QA #automation #hiring`,
 
@@ -313,19 +294,16 @@ Location: 🌎 Remote
 • APIs, real-time microservices, third-party integrations
 
 Comment "APPLY" for the direct link 👇
-https://remotegig.pro/=jobs
 
 #remotejobs #fullstack #developer #hiring`,
 
   ];
 
-  // Generate posts at random times from 7:00 AM to 10:00 PM TOMORROW
+  // Generate posts at fixed times from 1:00 PM to 10:00 PM on March 20, 2026
   function generateSchedule() {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const year = tomorrow.getFullYear();
-    const month = tomorrow.getMonth() + 1;
-    const day = tomorrow.getDate();
+    const year = 2026;
+    const month = 3;
+    const day = 20;
     const TARGET_POSTS = POST_TEMPLATES.length;
 
     if (TARGET_POSTS === 0) {
@@ -333,7 +311,7 @@ https://remotegig.pro/=jobs
       return [];
     }
 
-    const startMin = 7 * 60; // 7:00 AM
+    const startMin = 13 * 60; // 1:00 PM
     const endMin = 22 * 60 - 1; // 9:59 PM
     const times = [];
 

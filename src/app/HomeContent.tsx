@@ -30,7 +30,7 @@ export default function HomeContent({ initialJobs, plan, filterOptions, totalJob
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(initialJobs.length < totalJobs);
   const [total, setTotal] = useState(totalJobs);
-  const [isFiltered, setIsFiltered] = useState(false);
+
 
   const loaderRef = useRef<HTMLDivElement>(null);
   const searchTimer = useRef<ReturnType<typeof setTimeout>>(null);
@@ -119,14 +119,12 @@ export default function HomeContent({ initialJobs, plan, filterOptions, totalJob
 
   // Re-fetch when filters/search change
   useEffect(() => {
-    const hasFilters = search || activeCount > 0;
-    setIsFiltered(!!hasFilters);
 
     if (searchTimer.current) clearTimeout(searchTimer.current);
 
     searchTimer.current = setTimeout(() => {
       fetchJobs(0, true);
-    }, hasFilters ? 300 : 0); // debounce search
+    }, (search || activeCount > 0) ? 300 : 0); // debounce search
 
     return () => { if (searchTimer.current) clearTimeout(searchTimer.current); };
   }, [search, filters, salaryMin, activeCount, fetchJobs]);
@@ -262,13 +260,7 @@ export default function HomeContent({ initialJobs, plan, filterOptions, totalJob
           </div>
         </div>
 
-        {/* Results count */}
-        <div className="max-w-[900px] sm:mx-auto mb-4 flex items-center justify-between">
-          <p className="text-[13px] text-muted-foreground">
-            {isFiltered ? `${total} ${total === 1 ? "job" : "jobs"} found` : `${total} remote jobs`}
-            {activeCount > 0 && <span> · <button onClick={clearAllFilters} className="text-foreground hover:underline bg-transparent border-0 cursor-pointer text-[13px]">Clear filters</button></span>}
-          </p>
-        </div>
+
 
         {/* Two Column Layout */}
         <div className="flex gap-6 pb-12" style={{ minHeight: "calc(100vh - 300px)" }}>
