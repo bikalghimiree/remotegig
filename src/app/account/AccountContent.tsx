@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { authClient } from "@/lib/auth/client";
 import { useOpenPanel } from "@openpanel/nextjs";
-import { BellIcon } from "lucide-react";
+import { BellIcon, CrownIcon } from "lucide-react";
 import type { ServerUser } from "@/lib/server-auth";
 import type { AlertData } from "./page";
 
@@ -32,6 +32,10 @@ export default function AccountContent({
   const [isActive, setIsActive] = useState(alert?.is_active ?? true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const [checkingOut, setCheckingOut] = useState(false);
+
+  const isPro = plan === "pro";
 
   async function openPortal() {
     setLoadingPortal(true);
@@ -58,6 +62,10 @@ export default function AccountContent({
   }
 
   async function handleSaveAlerts() {
+    if (!isPro) {
+      setShowUpgrade(true);
+      return;
+    }
     setSaving(true);
     op.track("job_alert_saved", { categories, locations, frequency, isActive });
     try {
@@ -76,6 +84,19 @@ export default function AccountContent({
       setTimeout(() => setSaved(false), 3000);
     } catch {}
     setSaving(false);
+  }
+
+  async function handleCheckout() {
+    setCheckingOut(true);
+    op.track("checkout_initiated", { source: "account_alerts" });
+    try {
+      const res = await fetch("/api/stripe/checkout", { method: "POST" });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else setCheckingOut(false);
+    } catch {
+      setCheckingOut(false);
+    }
   }
 
   return (
@@ -147,8 +168,8 @@ export default function AccountContent({
         </div>
       </div>
 
-      {/* Job Alerts - Pro only */}
-      {plan === "pro" && (
+      {/* Job Alerts */}
+      {
         <>
           <div className="flex items-center gap-2 mt-8 mb-4">
             <BellIcon size={18} className="text-foreground" />
@@ -251,9 +272,37 @@ export default function AccountContent({
             className="w-full h-11 rounded-xl text-[15px] font-medium cursor-pointer border-0 hover:opacity-90 transition-all disabled:opacity-50 mb-6"
             style={{ background: '#006145', color: '#fff' }}
           >
-            {saving ? "Saving..." : saved ? "Saved" : "Save Alert Preferences"}
+            {saving ? "Saving..." : saved ? "Saved" : isPro ? "Save Alert Preferences" : "Save Alert Preferences"}
           </button>
         </>
+      }
+
+      {/* Upgrade Modal */}
+      {showUpgrade && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/60 backdrop-blur-md" onClick={() => setShowUpgrade(false)}>
+          <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 max-w-[420px] w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-medium mb-4" style={{ background: '#006145', color: '#fff' }}>
+              <CrownIcon size={14} />
+              PRO PLAN
+            </div>
+            <h2 className="text-[20px] sm:text-[22px] font-medium mb-1 text-foreground">Upgrade to Save Alerts</h2>
+            <p className="text-[14px] text-muted-foreground mb-5">Get daily or weekly emails with new remote jobs matching your preferences.</p>
+            <div className="flex items-baseline gap-2 mb-5">
+              <span className="text-[20px] font-medium line-through text-muted-foreground">$19</span>
+              <span className="text-[40px] font-medium leading-none" style={{ color: '#006145' }}>$9</span>
+              <span className="text-[16px] font-medium text-muted-foreground">/month</span>
+            </div>
+            <button
+              onClick={handleCheckout}
+              disabled={checkingOut}
+              className="w-full h-11 rounded-xl text-[15px] font-medium cursor-pointer border-0 hover:opacity-90 transition-all disabled:opacity-50"
+              style={{ background: '#006145', color: '#fff' }}
+            >
+              {checkingOut ? "Redirecting..." : "Upgrade Now"}
+            </button>
+            <p className="text-center mt-4 text-[12px] text-muted-foreground">Secure payment via Stripe. Cancel anytime.</p>
+          </div>
+        </div>
       )}
 
     </main>
