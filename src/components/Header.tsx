@@ -33,6 +33,7 @@ export default function Header({ user }: { user?: { avatarUrl: string | null; di
     <header className="bg-background">
       <div className="mx-auto max-w-[1350px] px-4 sm:px-6 h-[56px] flex items-center">
         <Link href="/" className="shrink-0 no-underline flex items-center gap-2">
+          <Image src="/logo.svg" alt="" width={22} height={22} />
           <span className="text-[18px] font-semibold tracking-tight text-foreground">REMOTEGIG</span>
         </Link>
         <div className="flex-1" />
