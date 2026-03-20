@@ -10,20 +10,322 @@
 (function () {
   'use strict';
 
-  // ============ YOUR POSTS ============
-  // Add your post templates here. Will auto-generate times: posts spread from 10AM to 11PM today
+  // ============ YOUR POSTS (20 total: 15 Data + 5 Other) ============
   const POST_TEMPLATES = [
-    // Add posts here, one per string:
-    // `Your post content here`,
-    // `Another post here`,
+
+    // --- DATA JOBS (15) ---
+
+    `🟢 HIRING REMOTELY
+
+Role: Director Analyst – Data Analytics
+Company: Gartner
+Salary: $148,000 - $175,500/yr
+Location: 🌎 Remote
+
+• Lead procure-to-pay & master data analytics
+• SAP, Oracle, Informatica expertise required
+
+Comment "APPLY" and we'll send you the direct link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #dataanalyst #hiring #remotework`,
+
+    `🟢 HIRING REMOTELY
+
+Role: Data Analyst
+Company: Forbes
+Salary: $85,000 - $90,000/yr
+Location: 🌎 Remote
+
+• Own analytical projects & deliver actionable insights
+• SQL, data visualization, 1-3 yrs experience
+
+Comment "APPLY" for the direct link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #dataanalyst #hiring #remotework`,
+
+    `🟢 HIRING REMOTELY
+
+Role: Junior Data Analyst
+Company: FiscalNote
+Salary: $67K – $90K/yr
+Location: 🌎 Remote
+
+• Support global data collection & forecasting
+• Excel, R, Python, SQL, Tableau
+
+Comment "APPLY" and we'll send the link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #datajobs #juniorjobs #hiring`,
+
+    `🟢 HIRING REMOTELY
+
+Role: Data & AI Analyst
+Company: Accenture Federal Services
+Salary: $61,700 - $109,400/yr
+Location: 🌎 Remote
+
+• Design & maintain data pipelines
+• Machine learning + cloud platforms + BI tools
+
+Comment "APPLY" for the direct link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #dataanalyst #AI #hiring`,
+
+    `🟢 HIRING REMOTELY
+
+Role: Data Analyst
+Company: Flipp
+Salary: $76,000 - $80,000/yr
+Location: 🌎 Remote
+
+• Build dashboards & measurement frameworks
+• SQL, Python, Tableau required
+
+Comment "APPLY" and we'll send you the link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #dataanalyst #hiring #remotework`,
+
+    `🟢 HIRING REMOTELY
+
+Role: Business Intelligence Analyst
+Company: Providence
+Salary: $39.67 - $61.58/hr
+Location: 🌎 Remote
+
+• Design & manage BI solutions
+• SQL, data visualization, data warehouse design
+
+Comment "APPLY" for the direct link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #datajobs #BI #hiring`,
+
+    `🟢 HIRING REMOTELY
+
+Role: Data Analyst
+Company: NMI
+Salary: $32.69 - $39.90/hr
+Location: 🌎 Remote
+
+• Full-cycle CRM implementation
+• Excel modeling, SQL, cross-functional collaboration
+
+Comment "APPLY" and we'll send the link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #dataanalyst #hiring #remotework`,
+
+    `🟢 HIRING REMOTELY
+
+Role: Data Analyst
+Company: DWX
+Salary: $40/hr
+Location: 🌎 Remote
+
+• Build automated data solutions
+• Microsoft analytics tools, supplier management
+
+Comment "APPLY" for the direct link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #dataanalyst #contract #hiring`,
+
+    `🟢 HIRING REMOTELY
+
+Role: Data Entry
+Company: The Hartford
+Salary: $46,222 - $69,333/yr
+Location: 🌎 Remote
+
+• Manage high-volume insurance transactions
+• Prepare new business issues & consolidate quotes
+
+Comment "APPLY" and we'll send you the link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #dataentry #hiring #remotework`,
+
+    `🟢 HIRING REMOTELY
+
+Role: Data Entry Specialist
+Company: Talentmate
+Salary: $1,000 - $1,500/mo
+Location: 🌎 Remote
+
+• Input & maintain business data accurately
+• Google Sheets, Excel, US time zones
+
+Comment "APPLY" for the direct link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #dataentry #hiring #workfromhome`,
+
+    `🟢 HIRING REMOTELY
+
+Role: Data Entry Clerk
+Company: Anova Care
+Salary: $23 - $27/hr
+Location: 🌎 Remote
+
+• Manage account updates & payment processing
+• Document transactions & resolve discrepancies
+
+Comment "APPLY" and we'll send the link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #dataentry #hiring #remotework`,
+
+    `🟢 HIRING REMOTELY
+
+Role: Business Operations – Data Entry
+Company: Mindlance
+Salary: $16/hr
+Location: 🌎 Remote
+
+• Process requests, claims & admin tasks
+• 1yr data entry experience, strong typing speed
+
+Comment "APPLY" for the direct link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #dataentry #hiring #workfromhome`,
+
+    `🟢 HIRING REMOTELY
+
+Role: Data Analyst – Energy Efficiency
+Company: CLEAResult
+Salary: $23 - $33/hr
+Location: 🌎 Remote
+
+• Data analysis, modeling & automation
+• Excel, Visual Basic, Smartsheet
+
+Comment "APPLY" and we'll send the link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #dataanalyst #energy #hiring`,
+
+    `🟢 HIRING REMOTELY
+
+Role: Data Quality Engineer Intern
+Company: Abacus Insights
+Salary: $22 - $31/hr
+Location: 🌎 Remote
+
+• Test & validate healthcare data pipelines
+• AWS, PySpark, SQL
+
+Comment "APPLY" for the direct link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #datajobs #internship #hiring`,
+
+    `🟢 HIRING REMOTELY
+
+Role: Business Analyst Intern
+Company: Calo Inc.
+Salary: $21/hr
+Location: 🌎 Remote
+
+• Support BI & product teams with data analysis
+• Build dashboards & automate reporting
+
+Comment "APPLY" and we'll send the link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #dataanalyst #internship #hiring`,
+
+    // --- OTHER JOBS (5) ---
+
+    `🟢 HIRING REMOTELY
+
+Role: Software Engineer – React
+Company: Metal Toad
+Salary: $104K - $156K/yr
+Location: 🌎 Remote
+
+• Build scalable enterprise-grade React apps
+• Full dev lifecycle, TDD/BDD, code reviews
+
+Comment "APPLY" for the direct link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #softwareengineer #react #hiring`,
+
+    `🟢 HIRING REMOTELY
+
+Role: Software Engineer, Front End
+Company: Camunda
+Salary: $119,900 - $193,200/yr
+Location: 🌎 Remote
+
+• Build enterprise modeling tools
+• JavaScript, web development, user-centered design
+
+Comment "APPLY" and we'll send the link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #frontend #hiring #remotework`,
+
+    `🟢 HIRING REMOTELY
+
+Role: Product Data Analyst
+Company: Clover Health
+Salary: $150,000 - $175,000/yr
+Location: 🌎 Remote
+
+• Define product metrics, build dashboards, run experiments
+• SQL, Python, product analytics
+
+Comment "APPLY" for the direct link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #productanalyst #hiring #remotework`,
+
+    `🟢 HIRING REMOTELY
+
+Role: QA Automation Engineer
+Company: Upshop
+Salary: $56/hr
+Location: 🌎 Remote
+
+• Design end-to-end & API automated tests
+• Cypress, WebDriverIO, JavaScript/TypeScript
+
+Comment "APPLY" and we'll send the link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #QA #automation #hiring`,
+
+    `🟢 HIRING REMOTELY
+
+Role: Backend & Frontend Developer
+Company: Base360.ai
+Salary: $56/hr
+Location: 🌎 Remote
+
+• Design scalable backend services & dashboards
+• APIs, real-time microservices, third-party integrations
+
+Comment "APPLY" for the direct link 👇
+https://remotegig.pro/=jobs
+
+#remotejobs #fullstack #developer #hiring`,
+
   ];
 
-  // Generate posts at random times from 10:00 AM to 11:00 PM today
+  // Generate posts at random times from 7:00 AM to 10:00 PM TOMORROW
   function generateSchedule() {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth() + 1;
-    const day = today.getDate();
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const year = tomorrow.getFullYear();
+    const month = tomorrow.getMonth() + 1;
+    const day = tomorrow.getDate();
     const TARGET_POSTS = POST_TEMPLATES.length;
 
     if (TARGET_POSTS === 0) {
@@ -31,9 +333,8 @@
       return [];
     }
 
-    // Generate random minutes between 10:00 AM (600) and 22:59 PM (1379)
-    const startMin = 10 * 60; // 10:00 AM = minute 600
-    const endMin = 23 * 60 - 1; // 10:59 PM = minute 1379
+    const startMin = 7 * 60; // 7:00 AM
+    const endMin = 22 * 60 - 1; // 9:59 PM
     const times = [];
 
     for (let i = 0; i < TARGET_POSTS; i++) {
@@ -42,7 +343,7 @@
       do {
         t = startMin + Math.floor(Math.random() * (endMin - startMin));
         attempts++;
-      } while (times.some(x => Math.abs(x - t) < 15) && attempts < 100); // at least 15 min apart
+      } while (times.some(x => Math.abs(x - t) < 15) && attempts < 100);
       times.push(t);
     }
     times.sort((a, b) => a - b);
@@ -68,7 +369,6 @@
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   let STOP = false;
 
-  // Set a native <select> value with verify and retry
   function setSelectValue(select, value) {
     const nativeSetter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set;
 
@@ -87,7 +387,6 @@
     return false;
   }
 
-  // Find all 6 selects dynamically and set values
   function setScheduleDateTime(post) {
     const selects = document.querySelectorAll('select');
     if (selects.length < 6) {
@@ -107,7 +406,6 @@
       }
     }
 
-    // Double verify all values after setting
     console.log('  --- Verifying all values ---');
     for (let i = 0; i < 6; i++) {
       const actual = selects[offset + i].value;
@@ -129,7 +427,6 @@
     console.log(`📝 [${index + 1}/${total}] Scheduling for ${post.month}/${post.day} ${post.hour}:${post.minute} ${post.ampm}`);
     console.log(`   Text: ${post.text.substring(0, 60)}...`);
 
-    // Step 0: Close any existing compose modal first
     const closeBtn = document.querySelector('[data-testid="app-bar-close"]') ||
                      document.querySelector('[aria-label="Close"]');
     if (closeBtn) {
@@ -142,7 +439,6 @@
       }
     }
 
-    // Step 1: Click compose button
     const composeBtn = document.querySelector('[data-testid="SideNav_NewTweet_Button"]') ||
                        document.querySelector('a[href="/compose/post"]');
 
@@ -155,7 +451,6 @@
 
     if (STOP) return false;
 
-    // Step 2: Wait for text box
     let textBox = null;
     for (let i = 0; i < 20; i++) {
       textBox = document.querySelector('[data-testid="tweetTextarea_0"]');
@@ -167,7 +462,6 @@
       return false;
     }
 
-    // Step 3: Insert text via clipboard paste
     textBox.focus();
     await sleep(200);
 
@@ -193,7 +487,6 @@
 
     if (STOP) return false;
 
-    // Step 4: Click schedule icon
     let scheduleIcon = document.querySelector('[aria-label*="Schedule"], [data-testid*="schedule"]');
     if (!scheduleIcon) {
       scheduleIcon = document.evaluate(
@@ -211,13 +504,11 @@
 
     if (STOP) return false;
 
-    // Step 5: Set date and time
     setScheduleDateTime(post);
     await sleep(500);
 
     if (STOP) return false;
 
-    // Step 6: Click Confirm
     const buttons = document.querySelectorAll('[role="dialog"] button, [aria-modal="true"] button');
     const confirmBtn = [...buttons].find((btn) => btn.textContent?.trim() === 'Confirm');
     if (confirmBtn) {
@@ -231,7 +522,6 @@
 
     if (STOP) return false;
 
-    // Step 7: Click Schedule/Post button
     const postBtn = document.querySelector('[data-testid="tweetButton"]');
     if (postBtn) {
       postBtn.click();
@@ -244,7 +534,7 @@
 
   // ============ UI ============
   const btn = document.createElement('button');
-  btn.textContent = '📅 RemoteGig Schedule';
+  btn.textContent = '📅 RemoteGig Schedule (20)';
   btn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:99999;padding:12px 24px;background:#006145;color:white;border:none;border-radius:30px;font-size:16px;font-weight:bold;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
 
   btn.onclick = async () => {
@@ -261,7 +551,7 @@
 
     const posts = generateSchedule();
     if (posts.length === 0) {
-      btn.textContent = '📅 RemoteGig Schedule';
+      btn.textContent = '📅 RemoteGig Schedule (20)';
       btn.style.background = '#006145';
       return;
     }
@@ -284,7 +574,7 @@
     btn.textContent = `✅ Done (${success}/${posts.length})`;
     btn.style.background = '#17bf63';
     setTimeout(() => {
-      btn.textContent = '📅 RemoteGig Schedule';
+      btn.textContent = '📅 RemoteGig Schedule (20)';
       btn.style.background = '#006145';
     }, 5000);
   };
