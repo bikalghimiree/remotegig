@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { SunIcon, MoonIcon } from "lucide-react";
 import { authClient } from "@/lib/auth/client";
+import { useTheme } from "@/hooks/use-theme";
 
 const GoogleIcon = () => (
   <svg width={16} height={16} viewBox="0 0 24 24">
@@ -16,18 +17,8 @@ const GoogleIcon = () => (
 );
 
 export default function Header({ user }: { user?: { avatarUrl: string | null; displayName: string } | null }) {
-  const [dark, setDark] = useState(() => {
-    if (typeof window !== "undefined") return document.documentElement.classList.contains("dark");
-    return false;
-  });
+  const { dark, toggle } = useTheme();
   const [signingIn, setSigningIn] = useState(false);
-
-  const toggle = () => {
-    const next = !dark;
-    setDark(next);
-    document.documentElement.classList.toggle("dark", next);
-    localStorage.setItem("theme", next ? "dark" : "light");
-  };
 
   async function handleGoogleSignIn() {
     setSigningIn(true);

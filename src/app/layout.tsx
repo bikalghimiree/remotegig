@@ -74,7 +74,7 @@ export default async function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem("theme");if(!t){t="light";localStorage.setItem("theme",t)}if(t==="dark")document.documentElement.classList.add("dark")}catch(e){}`,
+            __html: `try{var t=localStorage.getItem("theme");if(!t){t=window.matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light";localStorage.setItem("theme",t)}if(t==="dark")document.documentElement.classList.add("dark")}catch(e){}`,
           }}
         />
       </head>
