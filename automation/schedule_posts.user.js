@@ -1,0 +1,293 @@
+// ==UserScript==
+// @name         RemoteGig X Post Scheduler
+// @namespace    remotegig
+// @version      1.0
+// @description  Bulk schedule posts on X.com for RemoteGig
+// @match        https://x.com/*
+// @grant        none
+// ==/UserScript==
+
+(function () {
+  'use strict';
+
+  // ============ YOUR POSTS ============
+  // Add your post templates here. Will auto-generate times: posts spread from 10AM to 11PM today
+  const POST_TEMPLATES = [
+    // Add posts here, one per string:
+    // `Your post content here`,
+    // `Another post here`,
+  ];
+
+  // Generate posts at random times from 10:00 AM to 11:00 PM today
+  function generateSchedule() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1;
+    const day = today.getDate();
+    const TARGET_POSTS = POST_TEMPLATES.length;
+
+    if (TARGET_POSTS === 0) {
+      alert('⚠️ No posts added! Edit the POST_TEMPLATES array first.');
+      return [];
+    }
+
+    // Generate random minutes between 10:00 AM (600) and 22:59 PM (1379)
+    const startMin = 10 * 60; // 10:00 AM = minute 600
+    const endMin = 23 * 60 - 1; // 10:59 PM = minute 1379
+    const times = [];
+
+    for (let i = 0; i < TARGET_POSTS; i++) {
+      let t;
+      let attempts = 0;
+      do {
+        t = startMin + Math.floor(Math.random() * (endMin - startMin));
+        attempts++;
+      } while (times.some(x => Math.abs(x - t) < 15) && attempts < 100); // at least 15 min apart
+      times.push(t);
+    }
+    times.sort((a, b) => a - b);
+
+    return times.map((t, i) => {
+      const hour24 = Math.floor(t / 60);
+      const min = t % 60;
+      const h = hour24 > 12 ? hour24 - 12 : (hour24 === 0 ? 12 : hour24);
+      const ampm = hour24 >= 12 ? 'pm' : 'am';
+      return {
+        text: POST_TEMPLATES[i % POST_TEMPLATES.length],
+        month: String(month),
+        day: String(day),
+        year: String(year),
+        hour: String(h),
+        minute: String(min),
+        ampm,
+      };
+    });
+  }
+
+  // ============ HELPERS ============
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  let STOP = false;
+
+  // Set a native <select> value with verify and retry
+  function setSelectValue(select, value) {
+    const nativeSetter = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value').set;
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+      nativeSetter.call(select, String(value));
+      select.dispatchEvent(new Event('input', { bubbles: true }));
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+
+      if (select.value === String(value)) {
+        console.log(`  ✅ ${select.id} = ${value} (attempt ${attempt + 1})`);
+        return true;
+      }
+      console.warn(`  ⚠️ ${select.id} expected "${value}" but got "${select.value}", retrying...`);
+    }
+    console.error(`  ❌ ${select.id} failed to set to "${value}" after 3 attempts`);
+    return false;
+  }
+
+  // Find all 6 selects dynamically and set values
+  function setScheduleDateTime(post) {
+    const selects = document.querySelectorAll('select');
+    if (selects.length < 6) {
+      console.error(`❌ Expected 6 selects, found ${selects.length}`);
+      return false;
+    }
+
+    const offset = selects.length - 6;
+    const values = [post.month, post.day, post.year, post.hour, post.minute, post.ampm];
+    const labels = ['Month', 'Day', 'Year', 'Hour', 'Minute', 'AM/PM'];
+
+    let allOk = true;
+    for (let i = 0; i < 6; i++) {
+      console.log(`  Setting ${labels[i]}...`);
+      if (!setSelectValue(selects[offset + i], values[i])) {
+        allOk = false;
+      }
+    }
+
+    // Double verify all values after setting
+    console.log('  --- Verifying all values ---');
+    for (let i = 0; i < 6; i++) {
+      const actual = selects[offset + i].value;
+      const expected = String(values[i]);
+      if (actual !== expected) {
+        console.error(`  ❌ ${labels[i]}: expected "${expected}" got "${actual}"`);
+        setSelectValue(selects[offset + i], values[i]);
+        allOk = false;
+      } else {
+        console.log(`  ✅ ${labels[i]}: ${actual}`);
+      }
+    }
+
+    return allOk;
+  }
+
+  async function schedulePost(post, index, total) {
+    if (STOP) return false;
+    console.log(`📝 [${index + 1}/${total}] Scheduling for ${post.month}/${post.day} ${post.hour}:${post.minute} ${post.ampm}`);
+    console.log(`   Text: ${post.text.substring(0, 60)}...`);
+
+    // Step 0: Close any existing compose modal first
+    const closeBtn = document.querySelector('[data-testid="app-bar-close"]') ||
+                     document.querySelector('[aria-label="Close"]');
+    if (closeBtn) {
+      closeBtn.click();
+      await sleep(500);
+      const discardBtn = [...document.querySelectorAll('[role="button"]')].find(b => b.textContent?.trim() === 'Discard');
+      if (discardBtn) {
+        discardBtn.click();
+        await sleep(500);
+      }
+    }
+
+    // Step 1: Click compose button
+    const composeBtn = document.querySelector('[data-testid="SideNav_NewTweet_Button"]') ||
+                       document.querySelector('a[href="/compose/post"]');
+
+    if (!composeBtn) {
+      console.error('❌ Could not find compose button');
+      return false;
+    }
+    composeBtn.click();
+    await sleep(1500);
+
+    if (STOP) return false;
+
+    // Step 2: Wait for text box
+    let textBox = null;
+    for (let i = 0; i < 20; i++) {
+      textBox = document.querySelector('[data-testid="tweetTextarea_0"]');
+      if (textBox) break;
+      await sleep(200);
+    }
+    if (!textBox) {
+      console.error('❌ Could not find text box');
+      return false;
+    }
+
+    // Step 3: Insert text via clipboard paste
+    textBox.focus();
+    await sleep(200);
+
+    try {
+      await navigator.clipboard.writeText(post.text);
+      const dt = new DataTransfer();
+      dt.setData('text/plain', post.text);
+      const pasteEvent = new ClipboardEvent('paste', {
+        clipboardData: dt,
+        bubbles: true,
+        cancelable: true,
+      });
+      textBox.dispatchEvent(pasteEvent);
+    } catch {
+      console.warn('Clipboard failed, using insertText fallback');
+      const lines = post.text.split('\n');
+      for (const line of lines) {
+        document.execCommand('insertText', false, line);
+        document.execCommand('insertText', false, '\n');
+      }
+    }
+    await sleep(800);
+
+    if (STOP) return false;
+
+    // Step 4: Click schedule icon
+    let scheduleIcon = document.querySelector('[aria-label*="Schedule"], [data-testid*="schedule"]');
+    if (!scheduleIcon) {
+      scheduleIcon = document.evaluate(
+        '//*[@id="layers"]/div[2]/div/div/div/div/div/div[2]/div[2]/div/div/div/div[3]/div[2]/div[1]/div/div/div/div[2]/div[2]/div/div/nav/div/div[2]/div/div[6]/button',
+        document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null
+      ).singleNodeValue;
+    }
+
+    if (!scheduleIcon) {
+      console.error('❌ Could not find schedule icon');
+      return false;
+    }
+    scheduleIcon.click();
+    await sleep(1000);
+
+    if (STOP) return false;
+
+    // Step 5: Set date and time
+    setScheduleDateTime(post);
+    await sleep(500);
+
+    if (STOP) return false;
+
+    // Step 6: Click Confirm
+    const buttons = document.querySelectorAll('[role="dialog"] button, [aria-modal="true"] button');
+    const confirmBtn = [...buttons].find((btn) => btn.textContent?.trim() === 'Confirm');
+    if (confirmBtn) {
+      confirmBtn.click();
+      console.log('✅ Confirmed schedule');
+    } else {
+      console.error('❌ Could not find Confirm button');
+      return false;
+    }
+    await sleep(1000);
+
+    if (STOP) return false;
+
+    // Step 7: Click Schedule/Post button
+    const postBtn = document.querySelector('[data-testid="tweetButton"]');
+    if (postBtn) {
+      postBtn.click();
+      console.log('✅ Post scheduled!');
+    }
+
+    await sleep(2000);
+    return true;
+  }
+
+  // ============ UI ============
+  const btn = document.createElement('button');
+  btn.textContent = '📅 RemoteGig Schedule';
+  btn.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:99999;padding:12px 24px;background:#006145;color:white;border:none;border-radius:30px;font-size:16px;font-weight:bold;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+
+  btn.onclick = async () => {
+    if (btn.textContent.includes('Stop')) {
+      STOP = true;
+      btn.textContent = '⏸ Stopping...';
+      btn.style.background = '#666';
+      return;
+    }
+
+    STOP = false;
+    btn.textContent = '🛑 Stop';
+    btn.style.background = '#e0245e';
+
+    const posts = generateSchedule();
+    if (posts.length === 0) {
+      btn.textContent = '📅 RemoteGig Schedule';
+      btn.style.background = '#006145';
+      return;
+    }
+
+    console.log(`🚀 Scheduling ${posts.length} posts...`);
+    console.log('Posts:', posts.map(p => `${p.hour}:${p.minute} ${p.ampm} - ${p.text.substring(0, 50)}...`));
+
+    let success = 0;
+    for (let i = 0; i < posts.length; i++) {
+      if (STOP) {
+        console.log('⏸ Stopped by user');
+        break;
+      }
+      const ok = await schedulePost(posts[i], i, posts.length);
+      if (ok) success++;
+      else console.warn(`⚠️ Post ${i + 1} may have failed`);
+    }
+
+    console.log(`\n🎉 Done! ${success}/${posts.length} posts scheduled`);
+    btn.textContent = `✅ Done (${success}/${posts.length})`;
+    btn.style.background = '#17bf63';
+    setTimeout(() => {
+      btn.textContent = '📅 RemoteGig Schedule';
+      btn.style.background = '#006145';
+    }, 5000);
+  };
+
+  document.body.appendChild(btn);
+})();

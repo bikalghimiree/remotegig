@@ -1,22 +1,39 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useOpenPanel } from "@openpanel/nextjs";
-import { SearchIcon, MapPinIcon, SlidersHorizontalIcon, XIcon, BriefcaseIcon, DollarSignIcon, ClockIcon, GlobeIcon, ArrowRightIcon, CrownIcon } from "lucide-react";
+import { SearchIcon, MapPinIcon, SlidersHorizontalIcon, XIcon, BriefcaseIcon, DollarSignIcon, ClockIcon, GlobeIcon, ArrowRightIcon, CrownIcon, Loader2Icon } from "lucide-react";
 import type { Job, FilterOptions } from "./page";
 
-type JobWithSalary = Job & { salary_min?: number | null; salary_max?: number | null };
+function timeAgo(date: string): string {
+  // If already formatted (e.g. "2d ago"), return as-is
+  if (date.includes("ago") || date === "Just now") return date;
+  const diff = Date.now() - new Date(date).getTime();
+  const hours = Math.floor(diff / 3600000);
+  if (hours < 1) return "Just now";
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
 
-export default function HomeContent({ jobs, plan, filterOptions }: { jobs: JobWithSalary[]; plan: "pro" | "free"; filterOptions: FilterOptions }) {
+export default function HomeContent({ initialJobs, plan, filterOptions, totalJobs }: { initialJobs: Job[]; plan: "pro" | "free"; filterOptions: FilterOptions; totalJobs: number }) {
   const op = useOpenPanel();
+  const [jobs, setJobs] = useState<Job[]>(initialJobs);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [salaryMin, setSalaryMin] = useState(0);
-  const [selectedJob, setSelectedJob] = useState(jobs[0] || null);
+  const [selectedJob, setSelectedJob] = useState(initialJobs[0] || null);
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [checkingOut, setCheckingOut] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(initialJobs.length < totalJobs);
+  const [total, setTotal] = useState(totalJobs);
+  const [isFiltered, setIsFiltered] = useState(false);
+
+  const loaderRef = useRef<HTMLDivElement>(null);
+  const searchTimer = useRef<ReturnType<typeof setTimeout>>(null);
 
   const isPro = plan === "pro";
 
@@ -66,24 +83,71 @@ export default function HomeContent({ jobs, plan, filterOptions }: { jobs: JobWi
     setSalaryMin(0);
   }
 
-  const filtered = useMemo(() => {
-    return jobs.filter((job) => {
-      const s = search.toLowerCase();
-      const matchesSearch = !search ||
-        job.company.toLowerCase().includes(s) ||
-        job.title.toLowerCase().includes(s) ||
-        job.description.toLowerCase().includes(s) ||
-        job.tags.some((t) => t.toLowerCase().includes(s));
+  // Fetch jobs from API
+  const fetchJobs = useCallback(async (offset: number, reset: boolean = false) => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    params.set("offset", String(offset));
+    params.set("limit", "50");
+    if (search) params.set("q", search);
+    if (filters.Category?.length) params.set("categories", filters.Category.join(","));
+    if (filters.Type?.length) params.set("types", filters.Type.join(","));
+    if (filters.Location?.length) params.set("locations", filters.Location.join(","));
+    if (salaryMin > 0) params.set("salaryMin", String(salaryMin));
 
-      const matchesCategory = !filters.Category?.length || filters.Category.includes(job.category);
-      const matchesType = !filters.Type?.length || filters.Type.includes(job.job_type);
-      const matchesLocation = !filters.Location?.length || filters.Location.includes(job.location);
+    try {
+      const res = await fetch(`/api/jobs?${params}`);
+      const data = await res.json();
+      const newJobs = (data.jobs as Job[]).map((j) => ({
+        ...j,
+        posted_at: timeAgo(j.posted_at),
+      }));
 
-      const matchesSalary = salaryMin === 0 || ((job.salary_min || 0) >= salaryMin) || ((job.salary_max || 0) >= salaryMin);
+      if (reset) {
+        setJobs(newJobs);
+        if (newJobs.length > 0) setSelectedJob(newJobs[0]);
+      } else {
+        setJobs((prev) => [...prev, ...newJobs]);
+      }
+      setHasMore(data.hasMore);
+      setTotal(data.total);
+    } catch (e) {
+      console.error("Failed to fetch jobs:", e);
+    }
+    setLoading(false);
+  }, [search, filters, salaryMin]);
 
-      return matchesSearch && matchesCategory && matchesType && matchesLocation && matchesSalary;
-    });
-  }, [jobs, search, filters, salaryMin]);
+  // Re-fetch when filters/search change
+  useEffect(() => {
+    const hasFilters = search || activeCount > 0;
+    setIsFiltered(!!hasFilters);
+
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+
+    searchTimer.current = setTimeout(() => {
+      fetchJobs(0, true);
+    }, hasFilters ? 300 : 0); // debounce search
+
+    return () => { if (searchTimer.current) clearTimeout(searchTimer.current); };
+  }, [search, filters, salaryMin, activeCount, fetchJobs]);
+
+  // Infinite scroll observer
+  useEffect(() => {
+    const node = loaderRef.current;
+    if (!node) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loading) {
+          fetchJobs(jobs.length);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [hasMore, loading, jobs.length, fetchJobs]);
 
   // Build filter sections dynamically
   const filterSections = [
@@ -145,7 +209,6 @@ export default function HomeContent({ jobs, plan, filterOptions }: { jobs: JobWi
                   )}
                 </div>
                 <div className="space-y-5">
-                  {/* Dynamic filter groups */}
                   {filterSections.map(({ key, label, items }) => (
                     <div key={key}>
                       <p className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2.5 font-medium">{label}</p>
@@ -202,7 +265,7 @@ export default function HomeContent({ jobs, plan, filterOptions }: { jobs: JobWi
         {/* Results count */}
         <div className="max-w-[900px] sm:mx-auto mb-4 flex items-center justify-between">
           <p className="text-[13px] text-muted-foreground">
-            {filtered.length} {filtered.length === 1 ? "job" : "jobs"} found
+            {isFiltered ? `${total} ${total === 1 ? "job" : "jobs"} found` : `${total} remote jobs`}
             {activeCount > 0 && <span> · <button onClick={clearAllFilters} className="text-foreground hover:underline bg-transparent border-0 cursor-pointer text-[13px]">Clear filters</button></span>}
           </p>
         </div>
@@ -211,7 +274,7 @@ export default function HomeContent({ jobs, plan, filterOptions }: { jobs: JobWi
         <div className="flex gap-6 pb-12" style={{ minHeight: "calc(100vh - 300px)" }}>
           {/* Left: Job Cards */}
           <div className="w-full lg:w-[420px] lg:shrink-0 space-y-2">
-            {filtered.map((job) => (
+            {jobs.map((job) => (
               <button
                 key={job.id}
                 onClick={() => { setSelectedJob(job); op.track('job_viewed', { jobId: job.id, company: job.company, role: job.title }); setMobileDetailOpen(true); }}
@@ -232,7 +295,21 @@ export default function HomeContent({ jobs, plan, filterOptions }: { jobs: JobWi
                 <p className="text-[13px] text-muted-foreground line-clamp-2">{job.description}</p>
               </button>
             ))}
-            {filtered.length === 0 && (
+
+            {/* Infinite scroll trigger */}
+            <div ref={loaderRef} className="py-6 flex justify-center">
+              {loading && (
+                <div className="flex items-center gap-2 text-[14px] text-muted-foreground">
+                  <Loader2Icon size={16} className="animate-spin" />
+                  Loading more jobs...
+                </div>
+              )}
+              {!hasMore && jobs.length > 0 && (
+                <p className="text-[13px] text-muted-foreground">All {total} jobs loaded</p>
+              )}
+            </div>
+
+            {jobs.length === 0 && !loading && (
               <div className="py-12 text-center">
                 <p className="text-[14px] text-foreground">No jobs match your filters.</p>
                 <button onClick={clearAllFilters} className="mt-2 text-[13px] text-foreground hover:underline bg-transparent border-0 cursor-pointer">
@@ -312,9 +389,6 @@ export default function HomeContent({ jobs, plan, filterOptions }: { jobs: JobWi
                 <button onClick={() => handleApply(selectedJob)} className="h-10 px-6 rounded-full whitespace-nowrap text-[14px] font-medium cursor-pointer border-0 hover:opacity-90 transition-opacity flex items-center justify-center gap-2" style={{ background: '#006145', color: '#fff' }}>
                   Apply now <ArrowRightIcon size={15} />
                 </button>
-                <button className="size-9 flex items-center justify-center rounded-full whitespace-nowrap border border-border bg-transparent text-foreground cursor-pointer hover:bg-foreground/[0.04] transition-colors">
-                  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-                </button>
               </div>
               <div className="flex flex-wrap items-center gap-2 mb-5">
                 <span className="flex items-center gap-1.5 text-[13px] px-2.5 py-1 rounded-full whitespace-nowrap font-medium" style={{ background: '#006145', color: '#fff' }}><BriefcaseIcon size={13} />{selectedJob.job_type}</span>
@@ -353,25 +427,18 @@ export default function HomeContent({ jobs, plan, filterOptions }: { jobs: JobWi
       {showUpgrade && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/60 backdrop-blur-md" onClick={() => setShowUpgrade(false)}>
           <div className="bg-card border border-border rounded-2xl p-6 sm:p-8 max-w-[420px] w-full mx-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            {/* Badge */}
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-medium mb-4" style={{ background: '#006145', color: '#fff' }}>
               <CrownIcon size={14} />
               PRO PLAN
             </div>
-
-            {/* Title */}
             <h2 className="text-[20px] sm:text-[22px] font-medium mb-1 text-foreground">
               Unlock Unlimited Access
             </h2>
-
-            {/* Price */}
             <div className="flex items-baseline gap-2 mb-5">
               <span className="text-[20px] font-medium line-through text-muted-foreground">$19</span>
               <span className="text-[40px] font-medium leading-none" style={{ color: '#006145' }}>$9</span>
               <span className="text-[16px] font-medium text-muted-foreground">/month</span>
             </div>
-
-            {/* Features */}
             <ul className="space-y-2.5 mb-6">
               {[
                 "Unlimited applications to remote jobs",
@@ -390,8 +457,6 @@ export default function HomeContent({ jobs, plan, filterOptions }: { jobs: JobWi
                 </li>
               ))}
             </ul>
-
-            {/* CTA */}
             <button
               onClick={handleCheckout}
               disabled={checkingOut}
@@ -400,8 +465,6 @@ export default function HomeContent({ jobs, plan, filterOptions }: { jobs: JobWi
             >
               {checkingOut ? "Redirecting..." : "Upgrade Now"}
             </button>
-
-            {/* Trust */}
             <p className="text-center mt-4 text-[12px] text-muted-foreground">
               Secure payment via Stripe. Cancel anytime with one click.
             </p>

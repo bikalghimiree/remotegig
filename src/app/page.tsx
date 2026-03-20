@@ -7,6 +7,8 @@ export type Job = {
   title: string;
   company: string;
   salary_text: string | null;
+  salary_min: number | null;
+  salary_max: number | null;
   location: string;
   job_type: string;
   category: string;
@@ -37,14 +39,15 @@ export default async function Home() {
   const sql = getDb();
   const { plan } = await getServerAuth();
 
-  // Fetch jobs + filter options in parallel
-  const [rows, categoryRows, typeRows, locationRows] = await Promise.all([
+  // Only load first 50 jobs + filter metadata (lightweight!)
+  const [rows, totalRows, categoryRows, typeRows, locationRows] = await Promise.all([
     sql`
       SELECT id, title, company, salary_text, salary_min, salary_max, location, job_type, category, description, requirements, tags, apply_url, posted_at
-      FROM jobs
-      WHERE is_active = true
+      FROM jobs WHERE is_active = true
       ORDER BY posted_at DESC
+      LIMIT 50
     `,
+    sql`SELECT COUNT(*)::int as total FROM jobs WHERE is_active = true`,
     sql`SELECT category as value, COUNT(*)::int as count FROM jobs WHERE is_active = true GROUP BY category ORDER BY count DESC`,
     sql`SELECT job_type as value, COUNT(*)::int as count FROM jobs WHERE is_active = true GROUP BY job_type ORDER BY count DESC`,
     sql`SELECT location as value, COUNT(*)::int as count FROM jobs WHERE is_active = true GROUP BY location HAVING COUNT(*) >= 2 ORDER BY count DESC`,
@@ -55,6 +58,8 @@ export default async function Home() {
     title: r.title as string,
     company: r.company as string,
     salary_text: r.salary_text as string | null,
+    salary_min: r.salary_min as number | null,
+    salary_max: r.salary_max as number | null,
     location: r.location as string,
     job_type: r.job_type as string,
     category: r.category as string,
@@ -63,8 +68,6 @@ export default async function Home() {
     tags: r.tags as string[],
     apply_url: r.apply_url as string,
     posted_at: timeAgo(r.posted_at as string),
-    salary_min: r.salary_min as number | null,
-    salary_max: r.salary_max as number | null,
   }));
 
   const filterOptions: FilterOptions = {
@@ -81,5 +84,7 @@ export default async function Home() {
     ],
   };
 
-  return <HomeContent jobs={jobs} plan={plan} filterOptions={filterOptions} />;
+  const totalJobs = (totalRows[0]?.total as number) || 0;
+
+  return <HomeContent initialJobs={jobs} plan={plan} filterOptions={filterOptions} totalJobs={totalJobs} />;
 }
