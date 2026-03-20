@@ -47,9 +47,8 @@ export async function getServerAuth(): Promise<ServerAuth> {
       ON CONFLICT (user_id) DO NOTHING
     `;
 
-    // Analytics: identify user + track login
+    // Analytics: identify user on each request (idempotent)
     op.identify({ profileId: user.id, email: user.email || "", name: user.name || "" });
-    op.track("user_login", { profileId: user.id, email: user.email || "" });
 
     // Fetch subscription
     const rows = await sql`

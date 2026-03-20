@@ -248,7 +248,7 @@ export default function HomeContent({ jobs, plan }: { jobs: Job[]; plan: "pro" |
       {/* Mobile Detail Popup */}
       {mobileDetailOpen && selectedJob && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/60 backdrop-blur-sm lg:hidden" onClick={() => setMobileDetailOpen(false)}>
-          <div className="bg-card border border-border rounded-2xl m-3 w-full max-h-[85vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-card border border-border rounded-2xl m-3 w-full max-h-[95vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="p-5">
               <div className="flex items-start justify-between mb-1">
                 <h2 className="text-[20px] font-medium tracking-[-0.02em] text-foreground">{selectedJob.title}</h2>
@@ -256,14 +256,22 @@ export default function HomeContent({ jobs, plan }: { jobs: Job[]; plan: "pro" |
               </div>
               <p className="text-[15px] text-foreground mb-3">{selectedJob.company}</p>
               <div className="flex items-center gap-3 text-[14px] text-foreground mb-4">
-                <span>{selectedJob.salary_text}</span>
+                <span className="flex items-center gap-1.5"><DollarSignIcon size={14} />{selectedJob.salary_text}</span>
                 <span className="flex items-center gap-1.5"><MapPinIcon size={14} />{selectedJob.location}</span>
-                <span>{selectedJob.posted_at}</span>
+                <span className="flex items-center gap-1.5"><ClockIcon size={14} />{selectedJob.posted_at}</span>
               </div>
               <div className="flex items-center gap-3 mb-5 pb-5 border-b border-border">
                 <button onClick={() => handleApply(selectedJob)} className="h-10 px-6 rounded-full whitespace-nowrap text-[14px] font-medium cursor-pointer border-0 hover:opacity-90 transition-opacity flex items-center justify-center gap-2" style={{ background: '#006145', color: '#fff' }}>
                   Apply now <ArrowRightIcon size={15} />
                 </button>
+                <button className="size-9 flex items-center justify-center rounded-full whitespace-nowrap border border-border bg-transparent text-foreground cursor-pointer hover:bg-foreground/[0.04] transition-colors">
+                  <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                </button>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 mb-5">
+                <span className="flex items-center gap-1.5 text-[13px] px-2.5 py-1 rounded-full whitespace-nowrap font-medium" style={{ background: '#006145', color: '#fff' }}><BriefcaseIcon size={13} />{selectedJob.job_type}</span>
+                <span className="flex items-center gap-1.5 text-[13px] px-2.5 py-1 rounded-full whitespace-nowrap font-medium" style={{ background: '#006145', color: '#fff' }}><GlobeIcon size={13} />{selectedJob.location}</span>
+                {selectedJob.tags.map((t) => (<span key={t} className="text-[13px] px-2.5 py-1 rounded-full whitespace-nowrap font-medium" style={{ background: '#006145', color: '#fff' }}>{t}</span>))}
               </div>
               <div className="mb-4">
                 <h3 className="text-[15px] font-medium text-foreground mb-2">About this role</h3>
@@ -277,6 +285,15 @@ export default function HomeContent({ jobs, plan }: { jobs: Job[]; plan: "pro" |
                       <span className="text-foreground mt-0.5">&#8226;</span>{req}
                     </li>
                   ))}
+                </ul>
+              </div>
+              <div className="mb-4">
+                <h3 className="text-[15px] font-medium text-foreground mb-2">Details</h3>
+                <ul className="space-y-1.5">
+                  <li className="text-[14px] text-foreground flex items-start gap-2"><span className="text-foreground mt-0.5">&#8226;</span>Category: {selectedJob.category}</li>
+                  <li className="text-[14px] text-foreground flex items-start gap-2"><span className="text-foreground mt-0.5">&#8226;</span>Type: {selectedJob.job_type}</li>
+                  <li className="text-[14px] text-foreground flex items-start gap-2"><span className="text-foreground mt-0.5">&#8226;</span>Compensation: {selectedJob.salary_text}</li>
+                  <li className="text-[14px] text-foreground flex items-start gap-2"><span className="text-foreground mt-0.5">&#8226;</span>Location: {selectedJob.location}</li>
                 </ul>
               </div>
             </div>
