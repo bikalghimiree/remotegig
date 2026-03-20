@@ -44,12 +44,21 @@ export const metadata: Metadata = {
     description:
       "We pull remote jobs from across the internet so you don't have to. Only real, verified positions, updated hourly.",
     url: "https://remotegig.pro",
+    images: [
+      {
+        url: "https://remotegig.pro/socialpreviewremotegig.png",
+        width: 1200,
+        height: 630,
+        alt: "RemoteGig | Every Remote Job. One Place.",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "RemoteGig | Every Remote Job. One Place.",
     description:
       "We pull remote jobs from across the internet so you don't have to. Only real, verified positions, updated hourly.",
+    images: ["https://remotegig.pro/socialpreviewremotegig.png"],
     creator: "@remotegig_",
     site: "@remotegig_",
   },

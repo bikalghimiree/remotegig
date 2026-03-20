@@ -23,8 +23,8 @@ export default function TermsPage() {
           <section>
             <h2 className="text-[18px] font-medium mb-3">3. Subscriptions and Payments</h2>
             <ul className="list-disc pl-6 space-y-1 text-foreground">
-              <li><strong>Free plan:</strong> Browse all jobs with limited detail views (3 per day)</li>
-              <li><strong>Pro plan:</strong> $9/month, unlimited access, email alerts, application tracker</li>
+              <li><strong>Free plan:</strong> Browse all jobs, view details, limited applications</li>
+              <li><strong>Pro plan:</strong> $9/month, unlimited applications, direct apply links, email alerts</li>
               <li>Payments are processed through Stripe</li>
               <li>Subscriptions renew automatically each month</li>
               <li>You can cancel anytime from your account page. No refunds for partial months</li>
