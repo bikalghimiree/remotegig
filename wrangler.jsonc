@@ -22,7 +22,7 @@
   "vars": {
     "NEXT_PUBLIC_APP_URL": "https://remotegig.pro",
     "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_live_51TCofDGkS6AWGclYkny1DpSl5NeAULu8lQHSvb7SuPxj8ru4SIqx4L5bEE5ZZDyEzeUUz1kpTt57MRCFrz86tn0b00ZJT76Tgs",
-    "NEXT_PUBLIC_OPENPANEL_CLIENT_ID": "e1d7373c-20cc-413c-8172-fbd8871e1a2b",
+    "NEXT_PUBLIC_OPENPANEL_CLIENT_ID": "962e9fe7-ff4d-4eea-909a-184cfa4d80af",
     "NEXT_PUBLIC_STRIPE_PRO_MONTHLY": "price_1TCp5DGkS6AWGclYSsGLl6sJ"
   },
   "observability": {
