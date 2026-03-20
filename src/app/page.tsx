@@ -6,7 +6,7 @@ export type Job = {
   id: number;
   title: string;
   company: string;
-  company_logo: string | null;
+
   salary_text: string | null;
   location: string;
   job_type: string;
@@ -32,7 +32,7 @@ export default async function Home() {
   const { plan } = await getServerAuth();
 
   const rows = await sql`
-    SELECT id, title, company, company_logo, salary_text, location, job_type, category, description, requirements, tags, apply_url, posted_at
+    SELECT id, title, company, salary_text, location, job_type, category, description, requirements, tags, apply_url, posted_at
     FROM jobs
     WHERE is_active = true
     ORDER BY posted_at DESC
@@ -42,7 +42,7 @@ export default async function Home() {
     id: r.id as number,
     title: r.title as string,
     company: r.company as string,
-    company_logo: r.company_logo as string | null,
+
     salary_text: r.salary_text as string | null,
     location: r.location as string,
     job_type: r.job_type as string,
