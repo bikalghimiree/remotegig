@@ -24,26 +24,31 @@ export default async function AccountPage() {
     redirect("/");
   }
 
+  const sql = getDb();
+
+  // Fetch filter options + alert in parallel
+  const [categoryRows, locationRows, alertRows] = await Promise.all([
+    sql`SELECT DISTINCT category FROM jobs WHERE is_active = true ORDER BY category`,
+    sql`SELECT DISTINCT location FROM jobs WHERE is_active = true AND location IS NOT NULL ORDER BY location`,
+    plan === "pro"
+      ? sql`SELECT id, keywords, categories, locations, frequency, is_active FROM job_alerts WHERE user_id = ${user.id} LIMIT 1`
+      : Promise.resolve([]),
+  ]);
+
+  const categoryOptions = categoryRows.map((r) => r.category as string);
+  const locationOptions = locationRows.map((r) => r.location as string);
+
   let alert: AlertData = null;
-  if (plan === "pro") {
-    const sql = getDb();
-    const rows = await sql`
-      SELECT id, keywords, categories, locations, frequency, is_active
-      FROM job_alerts
-      WHERE user_id = ${user.id}
-      LIMIT 1
-    `;
-    if (rows[0]) {
-      alert = {
-        id: rows[0].id as number,
-        keywords: rows[0].keywords as string[],
-        categories: rows[0].categories as string[],
-        locations: rows[0].locations as string[],
-        frequency: rows[0].frequency as string,
-        is_active: rows[0].is_active as boolean,
-      };
-    }
+  if (alertRows[0]) {
+    alert = {
+      id: alertRows[0].id as number,
+      keywords: alertRows[0].keywords as string[],
+      categories: alertRows[0].categories as string[],
+      locations: alertRows[0].locations as string[],
+      frequency: alertRows[0].frequency as string,
+      is_active: alertRows[0].is_active as boolean,
+    };
   }
 
-  return <AccountContent user={user} plan={plan} alert={alert} />;
+  return <AccountContent user={user} plan={plan} alert={alert} categoryOptions={categoryOptions} locationOptions={locationOptions} />;
 }

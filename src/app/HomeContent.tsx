@@ -1,20 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useOpenPanel } from "@openpanel/nextjs";
 import { SearchIcon, MapPinIcon, SlidersHorizontalIcon, XIcon, BriefcaseIcon, DollarSignIcon, ClockIcon, GlobeIcon, ArrowRightIcon, CrownIcon } from "lucide-react";
-import type { Job } from "./page";
+import type { Job, FilterOptions } from "./page";
 
-const FILTER_OPTIONS: Record<string, string[]> = {
-  Category: ["Engineering", "Design", "Marketing", "Data", "Writing", "Customer Success"],
-  Type: ["Full-time", "Part-time", "Contract"],
-  Location: ["Remote (US)", "Remote (Worldwide)", "Remote (US/EU)", "Remote (LATAM)"],
-};
+type JobWithSalary = Job & { salary_min?: number | null; salary_max?: number | null };
 
-export default function HomeContent({ jobs, plan }: { jobs: Job[]; plan: "pro" | "free" }) {
+export default function HomeContent({ jobs, plan, filterOptions }: { jobs: JobWithSalary[]; plan: "pro" | "free"; filterOptions: FilterOptions }) {
   const op = useOpenPanel();
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState<Record<string, string[]>>({});
+  const [salaryMin, setSalaryMin] = useState(0);
   const [selectedJob, setSelectedJob] = useState(jobs[0] || null);
   const [mobileDetailOpen, setMobileDetailOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -50,7 +47,7 @@ export default function HomeContent({ jobs, plan }: { jobs: Job[]; plan: "pro" |
     }
   }
 
-  const activeCount = Object.values(filters).flat().length;
+  const activeCount = Object.values(filters).flat().length + (salaryMin > 0 ? 1 : 0);
 
   function toggleFilter(group: string, value: string) {
     const current = filters[group] || [];
@@ -66,19 +63,34 @@ export default function HomeContent({ jobs, plan }: { jobs: Job[]; plan: "pro" |
   function clearAllFilters() {
     setFilters({});
     setSearch("");
+    setSalaryMin(0);
   }
 
-  const filtered = jobs.filter((job) => {
-    const matchesSearch = !search ||
-      job.company.toLowerCase().includes(search.toLowerCase()) ||
-      job.title.toLowerCase().includes(search.toLowerCase()) ||
-      job.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()));
-    if (activeCount === 0) return matchesSearch;
-    const matchesCategory = !filters.Category?.length || filters.Category.includes(job.category);
-    const matchesType = !filters.Type?.length || filters.Type.includes(job.job_type);
-    const matchesLocation = !filters.Location?.length || filters.Location.includes(job.location);
-    return matchesSearch && matchesCategory && matchesType && matchesLocation;
-  });
+  const filtered = useMemo(() => {
+    return jobs.filter((job) => {
+      const s = search.toLowerCase();
+      const matchesSearch = !search ||
+        job.company.toLowerCase().includes(s) ||
+        job.title.toLowerCase().includes(s) ||
+        job.description.toLowerCase().includes(s) ||
+        job.tags.some((t) => t.toLowerCase().includes(s));
+
+      const matchesCategory = !filters.Category?.length || filters.Category.includes(job.category);
+      const matchesType = !filters.Type?.length || filters.Type.includes(job.job_type);
+      const matchesLocation = !filters.Location?.length || filters.Location.includes(job.location);
+
+      const matchesSalary = salaryMin === 0 || ((job.salary_min || 0) >= salaryMin) || ((job.salary_max || 0) >= salaryMin);
+
+      return matchesSearch && matchesCategory && matchesType && matchesLocation && matchesSalary;
+    });
+  }, [jobs, search, filters, salaryMin]);
+
+  // Build filter sections dynamically
+  const filterSections = [
+    { key: "Category", label: "CATEGORY", items: filterOptions.categories },
+    { key: "Type", label: "JOB TYPE", items: filterOptions.types },
+    { key: "Location", label: "LOCATION", items: filterOptions.locations },
+  ];
 
   return (
     <div>
@@ -123,7 +135,7 @@ export default function HomeContent({ jobs, plan }: { jobs: Job[]; plan: "pro" |
             {filterOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setFilterOpen(false)} />
-                <div className="absolute right-0 top-[calc(100%+6px)] z-50 rounded-xl border border-border bg-card shadow-lg p-5 w-[540px]">
+                <div className="absolute right-0 top-[calc(100%+6px)] z-50 rounded-xl border border-border bg-card shadow-lg p-5 w-[540px] max-h-[70vh] overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-[14px] font-medium text-foreground">Filter by</span>
                   {activeCount > 0 && (
@@ -133,34 +145,66 @@ export default function HomeContent({ jobs, plan }: { jobs: Job[]; plan: "pro" |
                   )}
                 </div>
                 <div className="space-y-5">
-                  {Object.entries(FILTER_OPTIONS).map(([group, values]) => (
-                    <div key={group}>
-                      <p className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2.5 font-medium">{group}</p>
+                  {/* Dynamic filter groups */}
+                  {filterSections.map(({ key, label, items }) => (
+                    <div key={key}>
+                      <p className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2.5 font-medium">{label}</p>
                       <div className="flex flex-wrap gap-2">
-                        {values.map((v) => {
-                          const isActive = filters[group]?.includes(v);
+                        {items.map(({ value, count }) => {
+                          const isActive = filters[key]?.includes(value);
                           return (
                             <button
-                              key={v}
-                              onClick={() => toggleFilter(group, v)}
+                              key={value}
+                              onClick={() => toggleFilter(key, value)}
                               className={`px-3 py-1.5 rounded-full text-[13px] font-medium cursor-pointer transition-all border ${
                                 isActive
                                   ? "bg-foreground text-background border-foreground"
                                   : "bg-transparent text-foreground border-border hover:border-foreground/40 hover:bg-foreground/[0.04]"
                               }`}
                             >
-                              {v}
+                              {value} <span className="opacity-50 ml-0.5">{count}</span>
                             </button>
                           );
                         })}
                       </div>
                     </div>
                   ))}
+
+                  {/* Salary filter */}
+                  <div>
+                    <p className="text-[12px] uppercase tracking-wider text-muted-foreground mb-2.5 font-medium">MIN SALARY</p>
+                    <div className="flex flex-wrap gap-2">
+                      {filterOptions.salaryRanges.map(({ label, min }) => {
+                        const isActive = salaryMin === min;
+                        return (
+                          <button
+                            key={label}
+                            onClick={() => setSalaryMin(min)}
+                            className={`px-3 py-1.5 rounded-full text-[13px] font-medium cursor-pointer transition-all border ${
+                              isActive
+                                ? "bg-foreground text-background border-foreground"
+                                : "bg-transparent text-foreground border-border hover:border-foreground/40 hover:bg-foreground/[0.04]"
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               </div>
               </>
             )}
           </div>
+        </div>
+
+        {/* Results count */}
+        <div className="max-w-[900px] sm:mx-auto mb-4 flex items-center justify-between">
+          <p className="text-[13px] text-muted-foreground">
+            {filtered.length} {filtered.length === 1 ? "job" : "jobs"} found
+            {activeCount > 0 && <span> · <button onClick={clearAllFilters} className="text-foreground hover:underline bg-transparent border-0 cursor-pointer text-[13px]">Clear filters</button></span>}
+          </p>
         </div>
 
         {/* Two Column Layout */}
@@ -180,16 +224,20 @@ export default function HomeContent({ jobs, plan }: { jobs: Job[]; plan: "pro" |
                 <p className="text-[13px] text-muted-foreground mb-0.5">{job.company}</p>
                 <h3 className="text-[15px] font-medium text-foreground mb-2">{job.title}</h3>
                 <div className="flex flex-wrap items-center gap-1.5 mb-2">
-                  <span className="text-[12px] px-2 py-0.5 rounded-full font-medium" style={{ background: '#006145', color: '#fff' }}>{job.salary_text}</span>
+                  {job.salary_text && <span className="text-[12px] px-2 py-0.5 rounded-full font-medium" style={{ background: '#006145', color: '#fff' }}>{job.salary_text}</span>}
                   <span className="text-[12px] px-2 py-0.5 rounded-full font-medium" style={{ background: '#006145', color: '#fff' }}>{job.posted_at}</span>
-                  <span className="text-[12px] px-2 py-0.5 rounded-full font-medium" style={{ background: '#006145', color: '#fff' }}>{job.location}</span>
+                  <span className="text-[12px] px-2 py-0.5 rounded-full font-medium" style={{ background: '#006145', color: '#fff' }}>{job.job_type}</span>
+                  <span className="text-[12px] px-2 py-0.5 rounded-full font-medium border border-border text-foreground">{job.category}</span>
                 </div>
                 <p className="text-[13px] text-muted-foreground line-clamp-2">{job.description}</p>
               </button>
             ))}
             {filtered.length === 0 && (
               <div className="py-12 text-center">
-                <p className="text-[14px] text-foreground">No jobs match your search.</p>
+                <p className="text-[14px] text-foreground">No jobs match your filters.</p>
+                <button onClick={clearAllFilters} className="mt-2 text-[13px] text-foreground hover:underline bg-transparent border-0 cursor-pointer">
+                  Clear all filters
+                </button>
               </div>
             )}
           </div>
@@ -202,7 +250,7 @@ export default function HomeContent({ jobs, plan }: { jobs: Job[]; plan: "pro" |
               </div>
               <p className="text-[16px] text-foreground mb-4">{selectedJob.company}</p>
               <div className="flex items-center gap-4 text-[16px] text-foreground mb-4">
-                <span className="flex items-center gap-1.5"><DollarSignIcon size={14} />{selectedJob.salary_text}</span>
+                {selectedJob.salary_text && <span className="flex items-center gap-1.5"><DollarSignIcon size={14} />{selectedJob.salary_text}</span>}
                 <span className="flex items-center gap-1.5"><MapPinIcon size={14} />{selectedJob.location}</span>
                 <span className="flex items-center gap-1.5"><ClockIcon size={14} />{selectedJob.posted_at}</span>
               </div>
@@ -232,7 +280,7 @@ export default function HomeContent({ jobs, plan }: { jobs: Job[]; plan: "pro" |
                 <ul className="space-y-1.5">
                   <li className="text-[16px] text-foreground flex items-start gap-2"><span className="text-foreground mt-0.5">&#8226;</span>Category: {selectedJob.category}</li>
                   <li className="text-[16px] text-foreground flex items-start gap-2"><span className="text-foreground mt-0.5">&#8226;</span>Type: {selectedJob.job_type}</li>
-                  <li className="text-[16px] text-foreground flex items-start gap-2"><span className="text-foreground mt-0.5">&#8226;</span>Compensation: {selectedJob.salary_text}</li>
+                  {selectedJob.salary_text && <li className="text-[16px] text-foreground flex items-start gap-2"><span className="text-foreground mt-0.5">&#8226;</span>Compensation: {selectedJob.salary_text}</li>}
                   <li className="text-[16px] text-foreground flex items-start gap-2"><span className="text-foreground mt-0.5">&#8226;</span>Location: {selectedJob.location}</li>
                 </ul>
               </div>
@@ -256,7 +304,7 @@ export default function HomeContent({ jobs, plan }: { jobs: Job[]; plan: "pro" |
               </div>
               <p className="text-[15px] text-foreground mb-3">{selectedJob.company}</p>
               <div className="flex items-center gap-3 text-[14px] text-foreground mb-4">
-                <span className="flex items-center gap-1.5"><DollarSignIcon size={14} />{selectedJob.salary_text}</span>
+                {selectedJob.salary_text && <span className="flex items-center gap-1.5"><DollarSignIcon size={14} />{selectedJob.salary_text}</span>}
                 <span className="flex items-center gap-1.5"><MapPinIcon size={14} />{selectedJob.location}</span>
                 <span className="flex items-center gap-1.5"><ClockIcon size={14} />{selectedJob.posted_at}</span>
               </div>
@@ -292,7 +340,7 @@ export default function HomeContent({ jobs, plan }: { jobs: Job[]; plan: "pro" |
                 <ul className="space-y-1.5">
                   <li className="text-[14px] text-foreground flex items-start gap-2"><span className="text-foreground mt-0.5">&#8226;</span>Category: {selectedJob.category}</li>
                   <li className="text-[14px] text-foreground flex items-start gap-2"><span className="text-foreground mt-0.5">&#8226;</span>Type: {selectedJob.job_type}</li>
-                  <li className="text-[14px] text-foreground flex items-start gap-2"><span className="text-foreground mt-0.5">&#8226;</span>Compensation: {selectedJob.salary_text}</li>
+                  {selectedJob.salary_text && <li className="text-[14px] text-foreground flex items-start gap-2"><span className="text-foreground mt-0.5">&#8226;</span>Compensation: {selectedJob.salary_text}</li>}
                   <li className="text-[14px] text-foreground flex items-start gap-2"><span className="text-foreground mt-0.5">&#8226;</span>Location: {selectedJob.location}</li>
                 </ul>
               </div>

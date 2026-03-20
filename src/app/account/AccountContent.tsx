@@ -8,17 +8,18 @@ import { BellIcon, CrownIcon } from "lucide-react";
 import type { ServerUser } from "@/lib/server-auth";
 import type { AlertData } from "./page";
 
-const CATEGORY_OPTIONS = ["Engineering", "Design", "Marketing", "Data", "Writing", "Customer Success"];
-const LOCATION_OPTIONS = ["Remote (US)", "Remote (Worldwide)", "Remote (US/EU)", "Remote (LATAM)"];
-
 export default function AccountContent({
   user,
   plan,
   alert,
+  categoryOptions,
+  locationOptions,
 }: {
   user: ServerUser;
   plan: "pro" | "free";
   alert: AlertData;
+  categoryOptions: string[];
+  locationOptions: string[];
 }) {
   const [loadingPortal, setLoadingPortal] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -209,7 +210,7 @@ export default function AccountContent({
           <div className="border border-border rounded-xl bg-card p-4 mb-3">
             <p className="text-[14px] font-medium text-foreground mb-2.5">Categories</p>
             <div className="flex flex-wrap gap-2">
-              {CATEGORY_OPTIONS.map((cat) => (
+              {categoryOptions.map((cat: string) => (
                 <button
                   key={cat}
                   onClick={() => toggleItem(categories, setCategories, cat)}
@@ -229,7 +230,7 @@ export default function AccountContent({
           <div className="border border-border rounded-xl bg-card p-4 mb-3">
             <p className="text-[14px] font-medium text-foreground mb-2.5">Locations</p>
             <div className="flex flex-wrap gap-2">
-              {LOCATION_OPTIONS.map((loc) => (
+              {locationOptions.map((loc: string) => (
                 <button
                   key={loc}
                   onClick={() => toggleItem(locations, setLocations, loc)}
